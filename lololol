@@ -19,7 +19,10 @@ ap.add_argument("--mode", default="expat", help="One of expat (default), libxml,
 ap.add_argument("--command", help="Command to use in 'custom' mode")
 ap.add_argument("--keep", action="store_true", help="Always keep files (even if not suspicious)")
 ap.add_argument("--runs", default=1, help="Number of runs")
+ap.add_argument("-o", "--out", default="out", help="Output directory")
 args = ap.parse_args()
+
+os.mkdir(args.out)
 
 
 for _ in range(int(args.runs)):
@@ -38,7 +41,7 @@ for _ in range(int(args.runs)):
 
     start = int(time.time())
 
-    fn = f"out/b{secrets.token_urlsafe(10)}.xml"
+    fn = f"{args.out}/b{secrets.token_urlsafe(10)}.xml"
     pathlib.Path(fn).write_text(exploit)
 
     if args.mode == "expat":

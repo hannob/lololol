@@ -22,8 +22,7 @@ ap.add_argument("--runs", default=1, help="Number of runs")
 args = ap.parse_args()
 
 
-
-for i in range(int(args.runs)):
+for _ in range(int(args.runs)):
     length = getrn()
     multi = getrn()
     depth = getrn()
@@ -31,9 +30,9 @@ for i in range(int(args.runs)):
     lolstring = "l" * length
     exploit = f'<!DOCTYPE billion [ <!ENTITY a0 "{lolstring}">\n'
 
-    for i in range(depth):
-        entities = f"&a{i};" * multi
-        exploit += f'<!ENTITY a{i + 1} "{entities}">\n'
+    for j in range(depth):
+        entities = f"&a{j};" * multi
+        exploit += f'<!ENTITY a{j + 1} "{entities}">\n'
 
     exploit += f"]><x>&a{depth};</x>\n"
 
@@ -57,6 +56,7 @@ for i in range(int(args.runs)):
     duration = end - start
 
     if duration > 5:
-        print(f"{cmd} took long ({duration}s) with {fn}, length={length}, multi={multi}, depth={depth}")
+        print(f"{cmd} took long ({duration}s) with {fn},"
+              "length={length}, multi={multi}, depth={depth}")
     elif not args.keep:
         os.remove(fn)

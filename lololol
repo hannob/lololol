@@ -75,6 +75,6 @@ for _ in range(int(args.runs)):
 
     if duration > 5:
         print(f"{cmd} took long ({duration}s) with {fn},"
-              "length={length}, multi={multi}, depth={depth}")
+              f"length={length}, multi={multi}, depth={depth}")
     elif not args.keep:
         os.remove(fn)

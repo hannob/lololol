@@ -30,8 +30,8 @@ os.makedirs(args.out, exist_ok=True)
 
 for _ in range(int(args.runs)):
     length = getrn()
-    multi = getrn()
-    depth = getrn()
+    multi = getrn() + 1
+    depth = getrn() + 1
     count = getrn() + 1
     use_parameter_entities = bool(secrets.randbelow(2))
 

